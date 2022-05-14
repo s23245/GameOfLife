@@ -1,9 +1,11 @@
 import javax.swing.*;
+import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.NumberFormat;
 import java.util.Arrays;
 
 public class Main_Frame  implements ActionListener
@@ -28,7 +30,9 @@ public class Main_Frame  implements ActionListener
     JButton step_button;
     JButton restart_button;
 
-    Color LIFE_COLOR  = new Color(173, 193, 120);
+
+    Color LIFE_COLOR  = new Color(132, 169, 140);
+    Color DEAD_COLOR = new Color(53, 79, 82);
 
 
     public Main_Frame()
@@ -44,15 +48,17 @@ public class Main_Frame  implements ActionListener
         frame.add(main_panel_frame);
 
         top_panel = new JPanel(new BorderLayout());
-        top_panel.setSize(new Dimension(main_panel_frame.getWidth(), main_panel_frame.getHeight()/10));
+        top_panel.setSize(new Dimension(main_panel_frame.getWidth(), (int)(main_panel_frame.getHeight()*0.15)));
+        top_panel.setBorder(BorderFactory.createLineBorder(Color.black));
         top_panel.setVisible(true);
-        top_panel.setBackground(Color.GRAY);
+
 
         numbers_grid = new JPanel(new GridLayout(2, 10,10,10));
         numbers_grid.setVisible(true);
-        numbers_grid.setBackground(new Color(33, 158, 188));
+        numbers_grid.setBackground(new Color(47, 62, 70));
         numbers_grid.setPreferredSize(new Dimension((int)(top_panel.getWidth()*0.80), top_panel.getHeight()));
         numbers_grid.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+
 
         for(int j = 0 ; j < 2; j++)
         {
@@ -61,16 +67,24 @@ public class Main_Frame  implements ActionListener
                 if(j == 0)
                 {
                     cb_life_number[i] = new JCheckBox(""+i);
-                    cb_life_number[i].setFont(new Font("Verdana", Font.BOLD, 18));
                     cb_life_number[i].setHorizontalAlignment(SwingConstants.CENTER);
+                    cb_life_number[i].setFont(new Font("Verdana", Font.BOLD, 18));
+                    cb_life_number[i].setForeground(Color.white);
+                    cb_life_number[i].setBorderPainted(false);
+                    cb_life_number[i].setOpaque(false);
+                    cb_life_number[i].setContentAreaFilled(false);
                     numbers_grid.add(cb_life_number[i]);
 
                 }
                 else
                 {
                     cb_dead_number[i] = new JCheckBox(""+i);
-                    cb_dead_number[i].setFont(new Font("Verdana", Font.BOLD, 18));
                     cb_dead_number[i].setHorizontalAlignment(SwingConstants.CENTER);
+                    cb_dead_number[i].setFont(new Font("Verdana", Font.BOLD, 18));
+                    cb_dead_number[i].setForeground(Color.white);
+                    cb_dead_number[i].setBorderPainted(false);
+                    cb_dead_number[i].setOpaque(false);
+                    cb_dead_number[i].setContentAreaFilled(false);
                     numbers_grid.add(cb_dead_number[i]);
                 }
 
@@ -81,6 +95,7 @@ public class Main_Frame  implements ActionListener
         buttons_panel = new JPanel(new BorderLayout());
         buttons_panel.setPreferredSize(new Dimension((int)(top_panel.getWidth()*0.20), top_panel.getHeight()));
         buttons_panel.setVisible(true);
+        buttons_panel.setBackground(new Color(47, 62, 70));
 
 
         step_button = new JButton("NEXT STEP");
@@ -95,12 +110,13 @@ public class Main_Frame  implements ActionListener
         step_button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                step_button.setBackground(new Color(2, 28, 51));
+                step_button.setBackground(LIFE_COLOR);
                 step_button.setOpaque(true);
             }
 
             @Override
-            public void mouseExited(MouseEvent e) {
+            public void mouseExited(MouseEvent e)
+            {
                 step_button.setOpaque(false);
             }
         });
@@ -111,25 +127,28 @@ public class Main_Frame  implements ActionListener
         restart_button.setSize(new Dimension(buttons_panel.getWidth()/2, buttons_panel.getHeight()));
         restart_button.setFont(new Font("Verdana", Font.BOLD, 18));
         restart_button.setForeground(Color.white);
+        restart_button.setBackground(DEAD_COLOR);
         restart_button.setBorderPainted(false);
         restart_button.setOpaque(false);
         restart_button.setContentAreaFilled(false);
+        restart_button.addActionListener(this);
         restart_button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                restart_button.setBackground(new Color(2, 28, 51));
+                restart_button.setBackground(LIFE_COLOR);
                 restart_button.setOpaque(true);
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
+
                 restart_button.setOpaque(false);
             }
         });
         buttons_panel.add(restart_button,BorderLayout.EAST);
 
         top_panel.add(buttons_panel,BorderLayout.WEST);
-        top_panel.add(numbers_grid, BorderLayout.EAST);
+        top_panel.add(numbers_grid, BorderLayout.CENTER);
 
         main_panel_frame.add(top_panel,BorderLayout.NORTH);
 
@@ -137,7 +156,7 @@ public class Main_Frame  implements ActionListener
 
         game_field = new JPanel(new GridLayout(40,40));
         game_field.setVisible(true);
-        game_field.setMaximumSize(new Dimension(main_panel_frame.getWidth(), main_panel_frame.getHeight()));
+        game_field.setSize(new Dimension(main_panel_frame.getWidth(), (int)(main_panel_frame.getHeight()*0.85)));
         game_field.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 
         for(int j = 0; j < 40; j++)
@@ -147,8 +166,26 @@ public class Main_Frame  implements ActionListener
 
                 game_field_boxes[j][i] = new JPanel();
                 game_field_boxes[j][i].setBorder(BorderFactory.createLineBorder(Color.black));
-                if((j == 20 && i == 20) || (j == 21 && i == 21))
-                    game_field_boxes[j][i].setBackground(LIFE_COLOR);
+                game_field_boxes[j][i].setBackground(DEAD_COLOR);
+                int finalJ = j;
+                int finalI = i;
+                game_field_boxes[j][i].addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e)
+                    {
+                        if(game_field_boxes[finalJ][finalI].getBackground() == LIFE_COLOR)
+                        {
+                            game_field_boxes[finalJ][finalI].setBackground(DEAD_COLOR);
+                            game_field_numbers[finalJ][finalI] = 0;
+                        }
+                        else
+                        {
+                            game_field_boxes[finalJ][finalI].setBackground(LIFE_COLOR);
+                            game_field_numbers[finalJ][finalI] = 1;
+                        }
+                    }
+                });
+
                 game_field.add(game_field_boxes[j][i]);
             }
         }
@@ -184,6 +221,17 @@ public class Main_Frame  implements ActionListener
 
             FieldDraw();
         }
+        if(e.getSource() == restart_button)
+        {
+            for(int i = 0; i < 40; i++)
+            {
+                for(int j = 0; j < 40; j ++)
+                {
+                    game_field_numbers[i][j] = 0;
+                    FieldDraw();
+                }
+            }
+        }
 
     }
 
@@ -196,9 +244,10 @@ public class Main_Frame  implements ActionListener
                 if(game_field_numbers[j][i] == 1)
                     game_field_boxes[j][i].setBackground(LIFE_COLOR);
                 else
-                    game_field_boxes[j][i].setBackground(Color.WHITE);
+                    game_field_boxes[j][i].setBackground(DEAD_COLOR);
             }
         }
+        frame.validate();
     }
 
     private int[][] NextStepNumbers()
@@ -281,10 +330,10 @@ public class Main_Frame  implements ActionListener
            sum_of_neighbors =  CheckCorners(y,x,sum_of_neighbors);
         }
         else if(
-                        ( y >= 1 && y < 39 && x == 0) ||     // left side
-                        ( y == 0 && x >= 1 && x < 39) ||    // top side
-                        ( y >= 1 && y < 39 && x == 39)||    // right side
-                        ( y == 39 && x >= 1 && x < 39)      // bottom side
+                        ( y >= 1 && y < 39 && x == 0 ) ||     // left side
+                        ( y == 0 && x >= 1 && x < 39 ) ||    // top side
+                        ( y >= 1 && y < 39 && x == 39 )||    // right side
+                        ( y == 39 && x >= 1 && x < 39 )      // bottom side
         )
         {
             sum_of_neighbors = CheckSides(y,x,sum_of_neighbors);
@@ -309,6 +358,98 @@ public class Main_Frame  implements ActionListener
 
     private int CheckSides(int y, int x, int sum_of_neighbors)
     {
+        // left side
+        if( y >= 1 && y < 39 && x == 0 )
+        {
+            //top
+            if(game_field_numbers[y-1][39] == 1 || game_field_numbers[y-1][39] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[y-1][x] == 1 || game_field_numbers[y-1][x] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[y-1][x+1] == 1 || game_field_numbers[y-1][x+1] == -2)
+                sum_of_neighbors++;
+            //center
+            if(game_field_numbers[y][39] == 1 || game_field_numbers[y][39] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[y][x+1] == 1 || game_field_numbers[y][x+1] == -2)
+                sum_of_neighbors++;
+            //bottom
+            if(game_field_numbers[y+1][39] == 1 || game_field_numbers[y+1][39] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[y+1][x] == 1 || game_field_numbers[y+1][x] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[y+1][x+1] == 1 || game_field_numbers[y+1][x+1] == -2)
+                sum_of_neighbors++;
+        }
+        //top side
+        else if(  y == 0 && x >= 1 && x < 39 )
+        {
+            //top
+            if(game_field_numbers[39][x-1] == 1 || game_field_numbers[39][x-1] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[39][x] == 1 || game_field_numbers[39][x] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[39][x+1] == 1 || game_field_numbers[39][x+1] == -2)
+                sum_of_neighbors++;
+            //center
+            if(game_field_numbers[y][x-1] == 1 || game_field_numbers[y][x-1] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[y][x+1] == 1 || game_field_numbers[y][x+1] == -2)
+                sum_of_neighbors++;
+            //bottom
+            if(game_field_numbers[y+1][x+1] == 1 || game_field_numbers[y+1][x+1] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[y+1][x] == 1 || game_field_numbers[y+1][x] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[y+1][x+1] == 1 || game_field_numbers[y+1][x+1] == -2)
+                sum_of_neighbors++;
+        }
+        // right side
+        else if(  y >= 1 && y < 39 && x == 39 )
+        {
+            //top
+            if(game_field_numbers[y-1][x-1] == 1 || game_field_numbers[y-1][x-1] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[y-1][x] == 1 || game_field_numbers[y-1][x] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[y-1][0] == 1 || game_field_numbers[y-1][0] == -2)
+                sum_of_neighbors++;
+            //center
+            if(game_field_numbers[y][x-1] == 1 || game_field_numbers[y][x-1] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[y][0] == 1 || game_field_numbers[y][0] == -2)
+                sum_of_neighbors++;
+            //bottom
+            if(game_field_numbers[y+1][x-1] == 1 || game_field_numbers[y+1][x-1] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[y+1][x] == 1 || game_field_numbers[y+1][x] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[y+1][0] == 1 || game_field_numbers[y+1][0] == -2)
+                sum_of_neighbors++;
+        }
+        //bottom side
+        else if(  y == 39 && x >= 1 && x < 39 )
+        {
+            //top
+            if(game_field_numbers[y-1][x-1] == 1 || game_field_numbers[y-1][x-1] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[y-1][x] == 1 || game_field_numbers[y-1][x] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[y-1][x+1] == 1 || game_field_numbers[y-1][x+1] == -2)
+                sum_of_neighbors++;
+            //center
+            if(game_field_numbers[y][x-1] == 1 || game_field_numbers[y][x-1] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[y][x+1] == 1 || game_field_numbers[y][x+1] == -2)
+                sum_of_neighbors++;
+            //bottom
+            if(game_field_numbers[0][x-1] == 1 || game_field_numbers[0][x-1] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[0][x] == 1 || game_field_numbers[0][x] == -2)
+                sum_of_neighbors++;
+            if(game_field_numbers[0][x+1] == 1 || game_field_numbers[0][x+1] == -2)
+                sum_of_neighbors++;
+        }
         return  sum_of_neighbors;
     }
 
