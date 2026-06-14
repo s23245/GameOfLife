@@ -116,5 +116,5 @@ mvn test
 - Add a packaged application distribution.
 
 ## Author
-
+Bohdan Bondarenko
 s23245
